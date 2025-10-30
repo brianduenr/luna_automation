@@ -1,0 +1,6 @@
+playwright
+pyaudio
+gtts
+speechrecognition
+pandas
+pydub
