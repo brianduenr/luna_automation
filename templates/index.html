@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Automation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+</head>
+<body>
+    <h1>Chatbot Automation Test</h1>
+    <form action="/run" method="post" enctype="multipart/form-data">
+        <label for="csv_file">Input CSV File:</label><br>
+        <input type="file" id="csv_file" name="csv_file" accept=".csv" required><br><br>
+
+        <label for="chatbot_url">Chatbot URL:</label><br>
+        <input type="text" id="chatbot_url" name="chatbot_url" size="50" required><br><br>
+
+        <label for="wake_word">Wake Word:</label><br>
+        <input type="text" id="wake_word" name="wake_word" required><br><br>
+
+        <input type="submit" value="Start Test">
+    </form>
+
+    <h2>Logs:</h2>
+    <div id="logs" style="border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: scroll;"></div>
+
+    <script>
+        var socket = io();
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        socket.on('test_started', function(data) {
+            var logs = document.getElementById('logs');
+            logs.innerHTML += '<p>Test started with task ID: ' + data.task_id + '</p>';
+        });
+
+        socket.on('log_message', function(data) {
+            var logs = document.getElementById('logs');
+            logs.innerHTML += '<p>' + data.message + '</p>';
+            logs.scrollTop = logs.scrollHeight;
+        });
+    </script>
+</body>
+</html>
