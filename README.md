@@ -59,20 +59,20 @@ Anda bisa mengubah beberapa pengaturan di file `config.py`:
 - `WAKE_WORD`: Kata sapaan untuk memulai percakapan (misal: "halo erva").
 - `SILENCE_THRESHOLD`: Batas waktu (detik) program akan berhenti merekam jika tidak ada suara.
 
-## Deployment on Free Hosting Platforms (e.g., Vercel, Railway)
+## Deployment on Hosting Platforms (e.g., Railway, Render)
 
-This application can be deployed to a free hosting platform, but with some limitations. These platforms are designed for web applications and do not provide the necessary hardware or drivers for the audio recording and speech-to-text features to work.
+This application is designed to be deployed on hosting platforms that support long-running services and background workers, such as Railway or Render.
 
-### Limitations
+### Limitations on Hosted Environments
 
-*   **Audio Recording and Speech-to-Text:** The audio-related features of this application will not work on free hosting platforms. The application will gracefully skip these steps and only perform the text-based part of the test.
-*   **Headless Browser:** The browser will always run in headless mode. You will not see a "pop-up" of the Chrome browser.
+*   **No Audio Processing:** The core audio recording and speech-to-text features of this application **will not work** in a typical cloud hosting environment. These platforms do not provide the necessary audio hardware or drivers. The application is designed to detect this and will gracefully skip the audio-related steps, proceeding with only the text-based parts of the test.
+*   **Headless Browser:** The browser will always run in `headless` mode. You will not see a "pop-up" of the Chrome browser during the test.
 
-### Instructions
+### Instructions for Railway
 
 1.  **Fork this repository.**
-2.  **Create a new project on your hosting platform and connect it to your forked repository.**
-3.  **Configure the following environment variables:**
-    *   `REDIS_URL`: The URL of your Redis instance. Most hosting platforms provide this as a service.
-    *   `SECRET_KEY`: A long, random string to secure your application.
-4.  **Deploy the application.** The hosting platform should automatically detect the `Procfile` and start the web server and Celery worker.
+2.  **Create a new project on Railway and connect it to your forked repository.**
+3.  **Add a Redis Database:** In your Railway project, add a "Redis" service. Railway will automatically provide the `REDIS_URL` environment variable to your application.
+4.  **Configure Environment Variables:**
+    *   In the "Variables" section of your Railway project, add a new variable called `SECRET_KEY` and set it to a long, random string.
+5.  **Deploy:** Railway will automatically detect the `Procfile` and deploy two services: a `web` service for the web application and a `worker` service for the Celery background tasks. Your application will be online and ready to use.
