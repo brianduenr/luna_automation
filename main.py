@@ -6,6 +6,8 @@ from config import LUNA_URL as DEFAULT_LUNA_URL, INPUT_CSV as DEFAULT_INPUT_CSV,
 from utils.tts_online import speak_text
 from utils.stt_local import listen_and_transcribe
 from utils.csv_handler import read_questions, write_header, append_result
+from utils.audio_capture import find_loopback_device
+import pyaudio
 
 # A default logger that just prints to the console
 def default_logger(message):
@@ -39,7 +41,7 @@ async def get_bot_response_text(page, logger=default_logger):
         logger(f"[❌] Gagal mengambil teks dari mode chat: {e}")
         return ""
 
-async def single_test_run(page, question_data, wake_word, output_csv, logger=default_logger):
+async def single_test_run(page, question_data, wake_word, output_csv, audio_enabled=True, logger=default_logger):
     """Menjalankan satu siklus tes untuk satu pertanyaan pada halaman yang sudah ada."""
     no = question_data["no"]
     pertanyaan = question_data["pertanyaan"]
@@ -48,11 +50,18 @@ async def single_test_run(page, question_data, wake_word, output_csv, logger=def
     logger(f"\n[🚀] Memulai tes untuk Pertanyaan #{no}: {pertanyaan}")
 
     try:
-        speak_text(pertanyaan)
-        time.sleep(1)
+        if audio_enabled:
+            speak_text(pertanyaan)
+            time.sleep(1)
 
-        logger("[🕓] Menunggu respon audio Luna...")
-        hasil_audio = listen_and_transcribe()
+            logger("[🕓] Menunggu respon audio Luna...")
+            hasil_audio = listen_and_transcribe()
+        else:
+            logger("[⚠️] Audio dinonaktifkan. Melewatkan perekaman audio.")
+            hasil_audio = "Audio disabled"
+            # Simulate a delay for the bot to respond
+            await page.wait_for_timeout(5000)
+
 
         logger("[🕓] Menunggu respon teks Luna...")
         hasil_teks = await get_bot_response_text(page, logger=logger)
@@ -79,6 +88,11 @@ async def run_automation(input_csv, output_csv, luna_url, wake_word, logger=defa
     questions = read_questions(input_csv)
     write_header(output_csv)
 
+    p = pyaudio.PyAudio()
+    audio_enabled = find_loopback_device(p) is not None
+    p.terminate()
+
+
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=False,
@@ -102,10 +116,11 @@ async def run_automation(input_csv, output_csv, luna_url, wake_word, logger=defa
             await page.evaluate("() => document.querySelectorAll('video, audio').forEach(el => el.muted = false)")
             logger("✅ Autoplay audio/video diaktifkan")
 
-            speak_text(wake_word)
+            if audio_enabled:
+                speak_text(wake_word)
 
             for q in questions:
-                await single_test_run(page, q, wake_word, output_csv, logger=logger)
+                await single_test_run(page, q, wake_word, output_csv, audio_enabled=audio_enabled, logger=logger)
 
         finally:
             await context.close()

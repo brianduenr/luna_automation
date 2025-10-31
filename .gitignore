@@ -13,3 +13,4 @@ target/
 dump.rdb
 uploads/
 jules-scratch/
+*.log
