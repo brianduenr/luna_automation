@@ -58,3 +58,21 @@ Anda bisa mengubah beberapa pengaturan di file `config.py`:
 - `INPUT_CSV` dan `OUTPUT_CSV`: Lokasi file input dan output.
 - `WAKE_WORD`: Kata sapaan untuk memulai percakapan (misal: "halo erva").
 - `SILENCE_THRESHOLD`: Batas waktu (detik) program akan berhenti merekam jika tidak ada suara.
+
+## Deployment on Free Hosting Platforms (e.g., Vercel, Railway)
+
+This application can be deployed to a free hosting platform, but with some limitations. These platforms are designed for web applications and do not provide the necessary hardware or drivers for the audio recording and speech-to-text features to work.
+
+### Limitations
+
+*   **Audio Recording and Speech-to-Text:** The audio-related features of this application will not work on free hosting platforms. The application will gracefully skip these steps and only perform the text-based part of the test.
+*   **Headless Browser:** The browser will always run in headless mode. You will not see a "pop-up" of the Chrome browser.
+
+### Instructions
+
+1.  **Fork this repository.**
+2.  **Create a new project on your hosting platform and connect it to your forked repository.**
+3.  **Configure the following environment variables:**
+    *   `REDIS_URL`: The URL of your Redis instance. Most hosting platforms provide this as a service.
+    *   `SECRET_KEY`: A long, random string to secure your application.
+4.  **Deploy the application.** The hosting platform should automatically detect the `Procfile` and start the web server and Celery worker.
